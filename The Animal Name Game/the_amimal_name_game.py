@@ -13,8 +13,8 @@ def show_start_screen():
     # Display some explanation text
     font = pygame.font.Font(None, 40)  # Adjust font size as needed
     text_lines = [
-        "Welcome to the Animal Name Game!", #Adjust for the kid ;)
-        "Press any key to start."
+        "Здравей Рада!", #Adjust acc. to the kid ;)
+        "Натисни клавиш и започни играта!"
     ]
     for i, line in enumerate(text_lines):
         text = font.render(line, True, (0, 0, 0))  # Black text
