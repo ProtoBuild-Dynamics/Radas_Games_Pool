@@ -1,0 +1,7 @@
+<u><b> The Animal Name Game </b></u>
+
+The game, titled <i><b> "The Animal Name Game" </b></i>, is an interactive and educational software designed to run on computers with the Pygame library. It combines learning with entertainment by teaching players animal names across three languages: German, English, and Bulgarian. The game operates on a simple premise: when a player presses a letter on the keyboard, the game displays the name of an animal that starts with that letter in German, along with its English and Bulgarian translations. Each animal name is showcased in a randomly chosen color, adding a vibrant visual element to the learning experience.
+
+The game's interface is minimalist and user-friendly, featuring a fullscreen display where the animal names are prominently shown in large, colorful fonts, centered on the screen. It caters to language learners and animal enthusiasts of all ages, encouraging players to explore and learn the names of animals in a fun and engaging way. The game is also designed to be intuitive, with a simple control scheme: any alphabetic key press reveals a new animal, and pressing the Escape key exits the game.
+
+<i><b> "The Animal Name Game" </b></i> is not only a tool for language learning but also a way to introduce diversity in linguistic education through interactive media. It leverages the Pygame library's capabilities for handling keyboard inputs and displaying graphics, making it an excellent project for those looking to combine coding skills with educational content creation.
