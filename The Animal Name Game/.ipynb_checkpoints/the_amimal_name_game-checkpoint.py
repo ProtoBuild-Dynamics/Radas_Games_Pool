@@ -4,78 +4,41 @@ import random
 
 def show_start_screen():
     screen.fill((255, 248, 220))  # Fill the screen with white
-
+    
     # Load and display the start screen image
-    start_image = pygame.image.load('The Animal Name Game/Animal_pics/rada.jpg')
+    start_image = pygame.image.load('The Animal Name Game/Animal_pics/rada.jpg') #Adjust for the kid ;)
     start_image_rect = start_image.get_rect(center=(screen_width // 2, screen_height // 2 - 100))
     screen.blit(start_image, start_image_rect)
-
+    
     # Display some explanation text
-    font = pygame.font.Font(None, 40)
+    font = pygame.font.Font(None, 40)  # Adjust font size as needed
     text_lines = [
-        "Здравей Рада!",
-        "Натисни 'Enter' за да започнеш играта!"
+        "Здравей Рада!", #Adjust acc. to the kid ;)
+        "Натисни клавиш и започни играта!"
     ]
     for i, line in enumerate(text_lines):
         text = font.render(line, True, (0, 0, 0))  # Black text
         text_rect = text.get_rect(center=(screen_width // 2, screen_height - 100 + i * 50))
         screen.blit(text, text_rect)
-
+    
     pygame.display.flip()
-
-    # Wait for user to press the Enter key to start the game
+    
+    # Wait for user to press a key to start the game
     waiting = True
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    waiting = False
-
-def handle_animal_display(pressed_key):
-    animal_names = animals_multilingual[pressed_key]
-    color = random.choice(list(colors.values()))
-    font = pygame.font.Font(None, 64)
-
-    # Load the corresponding animal image in WebP format
-    try:
-        animal_image = pygame.image.load(image_path + animal_names['English'] + '.webp')
-    except FileNotFoundError:
-        animal_image = default_image
-
-    # Display the first letter large
-    letter_font = pygame.font.Font(None, 200)
-    letter_text = letter_font.render(pressed_key.upper(), True, color)
-    letter_rect = letter_text.get_rect(center=(screen_width / 2 - 300, screen_height / 2))
-    screen.blit(letter_text, letter_rect)
-
-    # Display the image
-    screen.blit(pygame.transform.scale(animal_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
-
-    # Display animal names
-    start_y = 50
-    for i, (language, name) in enumerate(animal_names.items(), start=1):
-        text = font.render(f"{language}: {name}", True, color)
-        text_rect = text.get_rect(center=(screen_width / 2, start_y + (i - 1) * (64 + 10)))
-        screen.blit(text, text_rect)
-
-def handle_default_display():
-    # Display a default message and image if the key is not an animal letter
-    default_font = pygame.font.Font(None, 64)
-    default_text = default_font.render("Е няма такова животно!", True, colors['red'])
-    default_text_rect = default_text.get_rect(center=(screen_width / 2, 100))
-    screen.blit(default_text, default_text_rect)
-    screen.blit(pygame.transform.scale(default_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
+            if event.type == pygame.KEYDOWN:
+                waiting = False
 
 # Initialize pygame
 pygame.init()
 
-# Retrieve and set the display information
-info = pygame.display.Info()
-screen_width, screen_height = info.current_w, info.current_h
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+# Set up the display and other initial setups
+screen_width, screen_height = 1280, 960
+screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Animal Name Game')
 
 # Define colors
@@ -89,9 +52,10 @@ colors = {
 image_path = 'The Animal Name Game/Animal_pics/'
 
 # Load a default image for non-animal-key presses in WebP format
-default_image = pygame.image.load(image_path + 'default.webp')
+default_image = pygame.image.load(image_path + 'default.webp')  # Make sure this image exists in WebP format
 
-# Animal names by letter in DE/EN/BG
+# Animal names by letter in DE/EN/BG; Input first letter in DE
+# Your animals_multilingual dictionary here
 animals_multilingual = {    
     'a': {'Deutsch': 'Ameisenbär', 'English': 'Anteater', 'Български': 'Мравояд'},
     'b': {'Deutsch': 'Biber', 'English': 'Beaver', 'Български': 'Бобър'},
@@ -128,21 +92,49 @@ running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+            running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
             else:
-                screen.fill((255, 248, 220))
+                screen.fill((255, 248, 220))  # Change screen fill to white
                 pressed_key = pygame.key.name(event.key)
                 
+                # Load and display animal name and picture if key is valid
                 if pressed_key in animals_multilingual:
-                    handle_animal_display(pressed_key)
-                else:
-                    handle_default_display()
+                    animal_names = animals_multilingual[pressed_key]
+                    color = random.choice(list(colors.values()))
+                    font = pygame.font.Font(None, 64)  # Adjusted for better fit
+                    
+                    try:
+                        # Attempt to load the corresponding animal image in WebP format
+                        animal_image = pygame.image.load(image_path + animal_names['English'] + '.webp')
+                    except FileNotFoundError:
+                        # If the specific animal image is not found, use the default image
+                        animal_image = default_image
 
-    pygame.display.flip()
+                    # Display the image
+                    screen.blit(pygame.transform.scale(animal_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
+
+                    # Display animal names
+                    start_y = 50  # Start displaying names at the top
+                    
+                    for i, (language, name) in enumerate(animal_names.items(), start=1):
+                        text = font.render(f"{language}: {name}", True, color)
+                        text_rect = text.get_rect(center=(screen_width / 2, start_y + (i - 1) * (64 + 10)))  # Adjust spacing
+                        screen.blit(text, text_rect)
+                
+                else:
+                    # Display a default message and image if the key is not an animal letter
+                    default_font = pygame.font.Font(None, 64)
+                    default_text = default_font.render("Е няма такова животно!", True, colors['red'])
+                    default_text_rect = default_text.get_rect(center=(screen_width / 2, 100))
+                    screen.blit(default_text, default_text_rect)
+                    
+                    # Display the default image
+                    screen.blit(pygame.transform.scale(default_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
+                
+                pygame.display.flip()
 
 pygame.quit()
 sys.exit()
