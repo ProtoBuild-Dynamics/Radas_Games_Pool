@@ -1,98 +1,113 @@
 import pygame
 import sys
 import random
+import os
 
 def show_start_screen():
     screen.fill((255, 248, 220))  # Fill the screen with white
+    try:
+        start_image = pygame.image.load(os.path.join(image_path, 'rada.jpg'))
+        start_image_rect = start_image.get_rect(center=(screen_width // 2, screen_height // 2 - 100))
+        screen.blit(start_image, start_image_rect)
+    except Exception as e:
+        print(f"Failed to load start screen image: {e}")
 
-    # Load and display the start screen image
-    start_image = pygame.image.load('The Animal Name Game/Animal_pics/rada.jpg')
-    start_image_rect = start_image.get_rect(center=(screen_width // 2, screen_height // 2 - 100))
-    screen.blit(start_image, start_image_rect)
-
-    # Display some explanation text
     font = pygame.font.Font(None, 40)
-    text_lines = [
-        "Здравей Рада!",
-        "Натисни 'Enter' за да започнеш играта!"
-    ]
+    text_lines = ["Здравей Рада!", "Натисни 'Enter' за да започнеш играта!"]
     for i, line in enumerate(text_lines):
-        text = font.render(line, True, (0, 0, 0))  # Black text
+        text = font.render(line, True, (0, 0, 0))
         text_rect = text.get_rect(center=(screen_width // 2, screen_height - 100 + i * 50))
         screen.blit(text, text_rect)
-
     pygame.display.flip()
 
-    # Wait for user to press the Enter key to start the game
     waiting = True
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                return False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     waiting = False
+                    print("Starting the game...")  # Debug print
+    return True
+
+def clear_event_queue():
+    pygame.event.clear()
 
 def handle_animal_display(pressed_key):
-    animal_names = animals_multilingual[pressed_key]
-    color = random.choice(list(colors.values()))
-    font = pygame.font.Font(None, 64)
-
-    # Load the corresponding animal image in WebP format
     try:
-        animal_image = pygame.image.load(image_path + animal_names['English'] + '.webp')
-    except FileNotFoundError:
-        animal_image = default_image
+        animal_names = animals_multilingual[pressed_key]
+        color = random.choice(list(colors.values()))
+        font = pygame.font.Font(None, 64)
 
-    # Display the first letter large
-    letter_font = pygame.font.Font(None, 200)
-    letter_text = letter_font.render(pressed_key.upper(), True, color)
-    letter_rect = letter_text.get_rect(center=(screen_width / 2 - 300, screen_height / 2))
-    screen.blit(letter_text, letter_rect)
+        try:
+            animal_image = pygame.image.load(os.path.join(image_path, animal_names['English'] + '.webp'))
+            print(f"Loaded image for {animal_names['English']}")
+        except FileNotFoundError:
+            animal_image = default_image
+            print(f"Failed to load specific animal image, using default.")
 
-    # Display the image
-    screen.blit(pygame.transform.scale(animal_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
+        letter_font = pygame.font.Font(None, 200)
+        letter_text = letter_font.render(pressed_key.upper(), True, color)
+        letter_rect = letter_text.get_rect(center=(screen_width / 2 - 300, screen_height / 2))
+        screen.blit(letter_text, letter_rect)
 
-    # Display animal names
-    start_y = 50
-    for i, (language, name) in enumerate(animal_names.items(), start=1):
-        text = font.render(f"{language}: {name}", True, color)
-        text_rect = text.get_rect(center=(screen_width / 2, start_y + (i - 1) * (64 + 10)))
-        screen.blit(text, text_rect)
+        screen.blit(pygame.transform.scale(animal_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
+
+        start_y = 50
+        for i, (language, name) in enumerate(animal_names.items(), start=1):
+            text = font.render(f"{language}: {name}", True, color)
+            text_rect = text.get_rect(center=(screen_width / 2, start_y + (i - 1) * (64 + 10)))
+            screen.blit(text, text_rect)
+    except Exception as e:
+        print(f"Error displaying animal: {e}")
 
 def handle_default_display():
-    # Display a default message and image if the key is not an animal letter
     default_font = pygame.font.Font(None, 64)
     default_text = default_font.render("Е няма такова животно!", True, colors['red'])
     default_text_rect = default_text.get_rect(center=(screen_width / 2, 100))
     screen.blit(default_text, default_text_rect)
     screen.blit(pygame.transform.scale(default_image, (400, 400)), (screen_width / 2 - 200, screen_height / 2 - 200))
 
-# Initialize pygame
-pygame.init()
+def main_game_loop():
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                else:
+                    screen.fill((255, 248, 220))
+                    pressed_key = pygame.key.name(event.key)
+                    print(f"Key pressed: {pressed_key}")  # Debugging print
+                    
+                    if pressed_key in animals_multilingual:
+                        handle_animal_display(pressed_key)
+                    else:
+                        handle_default_display()
 
-# Retrieve and set the display information
-info = pygame.display.Info()
-screen_width, screen_height = info.current_w, info.current_h
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
-pygame.display.set_caption('Animal Name Game')
+        pygame.display.flip()
 
-# Define colors
-colors = {
-    'red': (255, 0, 0),
-    'blue': (0, 0, 255),
-    'purple': (128, 0, 128)
-}
+if __name__ == "__main__":
+    try:
+        pygame.init()
+        info = pygame.display.Info()
+        screen_width, screen_height = info.current_w, info.current_h
+        screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN)
+        pygame.display.set_caption('Animal Name Game')
 
-# Check path to the images directory to use "Animal_pics" subfolder!
-image_path = 'The Animal Name Game/Animal_pics/'
+        colors = {'red': (255, 0, 0), 'blue': (0, 0, 255), 'purple': (128, 0, 128)}
+        image_path = 'The Animal Name Game/Animal_pics'
+        default_image_path = os.path.join(image_path, 'default.webp')
+        if os.path.exists(default_image_path):
+            default_image = pygame.image.load(default_image_path)
+        else:
+            print(f"Error: 'default.webp' does not exist at {default_image_path}")
+            sys.exit(1)
 
-# Load a default image for non-animal-key presses in WebP format
-default_image = pygame.image.load(image_path + 'default.webp')
-
-# Animal names by letter in DE/EN/BG
-animals_multilingual = {    
+        animals_multilingual = {    
     'a': {'Deutsch': 'Ameisenbär', 'English': 'Anteater', 'Български': 'Мравояд'},
     'b': {'Deutsch': 'Biber', 'English': 'Beaver', 'Български': 'Бобър'},
     'c': {'Deutsch': 'Chamäleon', 'English': 'Chameleon', 'Български': 'Хамелеон'},
@@ -121,28 +136,10 @@ animals_multilingual = {
     'z': {'Deutsch': 'Zebra', 'English': 'Zebra', 'Български': 'Зебра'}
 }
 
-show_start_screen()
-
-# Main game loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                running = False
-            else:
-                screen.fill((255, 248, 220))
-                pressed_key = pygame.key.name(event.key)
-                
-                if pressed_key in animals_multilingual:
-                    handle_animal_display(pressed_key)
-                else:
-                    handle_default_display()
-
-    pygame.display.flip()
-
-pygame.quit()
-sys.exit()
+        if show_start_screen():
+            clear_event_queue()  # Clear all events before starting the main game loop
+            main_game_loop()
+    except Exception as general_error:
+        print(f"An unexpected error occurred: {general_error}")
+        pygame.quit()
+        sys.exit()
